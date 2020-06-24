@@ -4,6 +4,7 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 import it.polito.tdp.newufosightings.model.Model;
+import it.polito.tdp.newufosightings.model.Stato;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -33,7 +34,7 @@ public class FXMLController {
     private Button btnSelezionaAnno;
 
     @FXML
-    private ComboBox<?> cmbBoxForma;
+    private ComboBox<String> cmbBoxForma;
 
     @FXML
     private Button btnCreaGrafo;
@@ -49,12 +50,51 @@ public class FXMLController {
 
     @FXML
     void doCreaGrafo(ActionEvent event) {
+    	
+    	this.txtResult.clear();
+    	
+    	try {
+    		Integer anno = Integer.valueOf(this.txtAnno.getText());
+    		String forma = this.cmbBoxForma.getValue();
+    		
+    		if(anno>=1910 && anno<=2014) {
+	    		model.creaGrafo(anno, forma);
+	    		this.txtResult.appendText(String.format("Grafo creato!\n#vertici: %d\n#archi: %d",model.nVertici(), model.nArchi()));
+	    		
+	    		this.txtResult.appendText("\n\nPer ogni stato, peso adiacenti:\n");
+	    		
+	    		for(Stato s : model.stati()) {
+	    			this.txtResult.appendText(s.toString()+" "+model.sommaPesi(s)+"\n");
+	    			
+	    		}
+    		}else{
+    			this.txtResult.appendText("Inserisci valore tra 1910 e 2014");
+    		}
+    	}catch(NumberFormatException nfe) {
+    		this.txtResult.appendText("Inserire valore corretto");
+    	}
+    	
 
     }
 
     @FXML
     void doSelezionaAnno(ActionEvent event) {
+    	this.cmbBoxForma.getItems().clear();
 
+    	try {
+    		Integer anno = Integer.valueOf(this.txtAnno.getText());
+    		
+    		if(anno>=1910 && anno<=2014) {
+	    		
+	    		this.cmbBoxForma.getItems().addAll(model.forme(anno));
+	    		this.cmbBoxForma.setValue(model.forme(anno).get(0));
+    		}else {
+    			this.txtResult.appendText("Inserisci valore tra 1910 e 2014");
+    		}
+    		
+    	}catch(NumberFormatException nfe) {
+    		this.txtResult.appendText("Inserire valore corretto");
+    	}
     }
 
     @FXML
