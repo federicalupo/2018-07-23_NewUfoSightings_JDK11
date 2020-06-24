@@ -99,6 +99,38 @@ public class FXMLController {
 
     @FXML
     void doSimula(ActionEvent event) {
+    	this.txtResult.clear();
+    	
+    	try {
+    		Integer anno = Integer.valueOf(this.txtAnno.getText());
+    		String forma = this.cmbBoxForma.getValue();
+    		Long t1 = Long.valueOf(this.txtT1.getText());
+    		Double alfa = Double.valueOf(this.txtAlfa.getText());
+    		
+    		if(anno>=1910 && anno<=2014) {
+	    		 if(alfa>=0 && alfa<=100) {
+	    			 if(t1<365) {
+	    				 
+	    				 model.simula(t1, alfa, anno, forma);
+	    				 for(Stato s : model.stati()) {
+	    					 this.txtResult.appendText(s.toString()+" "+s.getDefcon()+"\n");
+	    				 }
+	    				 
+	    			 }else {
+	    				 txtResult.appendText("Inserire nGiorni");
+	    			 }
+	    			 
+	    		 }else {
+	    			 txtResult.appendText("Valore di alfa tra 0 e 100");
+	    		 }
+	    			
+	    	}else{
+    				this.txtResult.appendText("Inserisci valore tra 1910 e 2014");
+    			}
+    	}catch(NumberFormatException nfe) {
+    		this.txtResult.appendText("Inserire valore corretto");
+    	}
+    	
 
     }
 

@@ -7,8 +7,11 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.PriorityQueue;
 
 import it.polito.tdp.newufosightings.model.Arco;
+import it.polito.tdp.newufosightings.model.Evento;
+import it.polito.tdp.newufosightings.model.Evento.Tipo;
 import it.polito.tdp.newufosightings.model.Sighting;
 import it.polito.tdp.newufosightings.model.State;
 import it.polito.tdp.newufosightings.model.Stato;
@@ -168,6 +171,8 @@ public class NewUfoSightingsDAO {
 				"and state1<state2 " + 
 				"group by state1,state2";
 		
+		//confronto s1.state=state1 .. funziona perchè SQL capisce, case insensitive
+		
 		List<Arco> archi = new ArrayList<>();
 		
 		try {
@@ -181,6 +186,7 @@ public class NewUfoSightingsDAO {
 			while (rs.next()) {
 				Stato stato1 = idMap.get(rs.getString("state1"));
 				Stato stato2 = idMap.get(rs.getString("state2"));
+				
 				
 				if(stato1!=null && stato2!=null) {
 					archi.add(new Arco(stato1, stato2, rs.getInt("conta")));
@@ -196,7 +202,42 @@ public class NewUfoSightingsDAO {
 			throw new RuntimeException("Error Connection Database");
 		}
 	}
-	
+
+	public PriorityQueue<Evento> coda(Integer anno, String forma, Map<String, Stato> idMap){
+		String sql ="select datetime, state " + 
+				"from sighting " + 
+				"where shape =? " + 
+				"and year(datetime) = ? ";
+		
+		PriorityQueue<Evento> coda = new PriorityQueue<>();
+		
+		try {
+			Connection conn = DBConnect.getConnection();
+			PreparedStatement st = conn.prepareStatement(sql);
+			st.setString(1, forma);
+			st.setInt(2, anno);
+			
+			ResultSet rs = st.executeQuery();
+
+			while (rs.next()) {
+				Stato stato = idMap.get(rs.getString("state").toUpperCase()); //state è minuscolo
+				
+				
+				if(stato!=null) {
+					Evento e = new Evento(Tipo.AVVISTAMENTO, stato, rs.getTimestamp("datetime").toLocalDateTime());
+					coda.add(e);
+				}
+			}
+
+			conn.close();
+			return coda;
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			System.out.println("Errore connessione al database");
+			throw new RuntimeException("Error Connection Database");
+		}
+	}
 	
 }
 

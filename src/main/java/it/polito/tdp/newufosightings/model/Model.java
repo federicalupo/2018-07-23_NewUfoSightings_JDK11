@@ -64,6 +64,11 @@ public class Model {
 		return pesoTot;
 	}
 	
+	public void simula(Long t1, Double alfa, Integer anno, String forma) {
+		Simulatore simulatore = new Simulatore();
+		simulatore.init(grafo, idMap, dao.coda(anno, forma, idMap),  t1, alfa);
+		simulatore.run();
+	}
 	
 	
 }
